@@ -17,6 +17,8 @@ class PlaneGame(object):
 
         # 4. 设置定时器事件 - 创建敌机 1s间隔
         pygame.time.set_timer(CREATE_ENEMY_EVENT, 1000)
+        # 5. 设置每隔500ms英雄发射子弹事件
+        pygame.time.set_timer(HERO_FIRE_EVENT, 500)
 
     def __create_sprites(self):
 
@@ -32,6 +34,7 @@ class PlaneGame(object):
         # 创建英雄的精灵和精灵组
         self.hero = Hero()
         self.hero_group = pygame.sprite.Group(self.hero)
+
 
     def start_game(self):
         print("游戏开始...")
@@ -65,6 +68,12 @@ class PlaneGame(object):
                 # 将敌机精灵添加到敌机精灵组
                 self.enemy_group.add(enemy)
 
+            # 监听英雄发射子弹事件
+            elif event.type == HERO_FIRE_EVENT:
+                self.hero.fire()
+
+
+            # 监听器键盘按键移动：
             # 第一种实现向右移动方式   *** 按下抬起才算一次移动，操作灵活性低。
             # elif event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
             #     print("向右移动")
@@ -84,7 +93,23 @@ class PlaneGame(object):
                 self.hero.speed = 0
 
     def __check_collide(self):
-        pass
+
+        # 1. 子弹摧毁敌机
+        # 使用pygame内置的模块groupcollide可以检测精灵组之间是否有碰撞,碰撞后将碰撞的两个精灵组直接销毁
+        pygame.sprite.groupcollide(self.hero.bullets, self.enemy_group, True, True)
+
+        # 2. 敌机撞毁英雄
+        # 使用pygame内置的模块spritecollide(方法放回一个列表)可以检测精灵之间是否有碰撞,碰撞后将碰撞的两个精灵直接销毁
+        enemies = pygame.sprite.spritecollide(self.hero, self.enemy_group, True)
+
+        # 判断列表是否有内容
+        if len(enemies) > 0:
+
+            # 让英雄牺牲
+            self.hero.kill()
+
+            # 结束游戏
+            PlaneGame.__game_over()
 
     def __update_sprites(self):
 
@@ -96,6 +121,9 @@ class PlaneGame(object):
 
         self.hero_group.update()
         self.hero_group.draw(self.screen)
+
+        self.hero.bullets.update()
+        self.hero.bullets.draw(self.screen)
 
     # 因为是静态方法，所以不需要传入self且需要@staticmethod进行声明
     @staticmethod

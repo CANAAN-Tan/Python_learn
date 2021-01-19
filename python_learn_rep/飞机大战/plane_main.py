@@ -35,7 +35,6 @@ class PlaneGame(object):
         self.hero = Hero()
         self.hero_group = pygame.sprite.Group(self.hero)
 
-
     def start_game(self):
         print("游戏开始...")
 
@@ -71,7 +70,6 @@ class PlaneGame(object):
             # 监听英雄发射子弹事件
             elif event.type == HERO_FIRE_EVENT:
                 self.hero.fire()
-
 
             # 监听器键盘按键移动：
             # 第一种实现向右移动方式   *** 按下抬起才算一次移动，操作灵活性低。
